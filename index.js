@@ -1,10 +1,12 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+// const mongoose = require("mongoose");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
-
+// const dateSchema = new mongoose.Schema({ date: Date });
+// const DateModel = mongoose.model("Date", dateSchema);
 app.use(express.json());
 app.use(cors());
 
@@ -38,8 +40,37 @@ async function run() {
       res.send(result);
     });
 
+    // Get Single User
+    app.post("/singleuser", async (req, res) => {
+      const filter = req.body;
+      const result = await userCollection.findOne(filter);
+      res.send(result);
+    });
+
+    // Add New User
     app.post("/alluser", async (req, res) => {
-      console.log(req.body);
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // Update Single User
+    app.put("/userUpdate/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const user = req.body;
+      const options = { upsert: true };
+      // const age = DateModel({ date: new Date(user.age) });
+      const updateDoc = {
+        $set: {
+          name: user.name,
+          phone: user.phone,
+          address: user.address,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
+      console.log(result);
     });
   } finally {
   }
