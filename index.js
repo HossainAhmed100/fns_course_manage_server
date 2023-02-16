@@ -29,8 +29,56 @@ async function run() {
     const userCollection = client.db("user").collection("alluser");
 
     // Get All Course
-    app.get("/allcourse", async (req, res) => {
+    app.get("/allCourse", async (req, res) => {
       const result = await courseCollection.find({}).toArray();
+      res.send(result);
+    });
+
+    // ADD New Course
+    app.post("/addnewcourse", async (req, res) => {
+      const course = req.body.data;
+      const result = await courseCollection.insertOne(course);
+      res.send(result);
+    });
+
+    // Add New Record Class
+    app.put("/recordedclasss/:id", async (req, res) => {
+      // {data.classdate, data.classlink, data.classsize, data.classduration}
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const recordclass = req.body;
+      const options = { upsert: true };
+      const updateDoc = {
+        $push: {
+          recordClass: recordclass,
+        },
+      };
+      const result = await courseCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+      console.log(id);
+    });
+
+    // Delete Record Class
+    app.put("/recordedclasss/:id", async (req, res) => {
+      // {data.classdate, data.classlink, data.classsize, data.classduration}
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const recordclass = req.body;
+      const options = { upsert: true };
+      const updateDoc = {
+        $push: {
+          recordClass: recordclass,
+        },
+      };
+      const result = await courseCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
 
@@ -70,7 +118,21 @@ async function run() {
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       res.send(result);
-      console.log(result);
+    });
+
+    // Update User Role
+    app.put("/handleaccountstatus/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const user = req.body;
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          accountstatus: user.accountstatus,
+        },
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
   } finally {
   }
