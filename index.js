@@ -34,6 +34,14 @@ async function run() {
       res.send(result);
     });
 
+    // Get Specific Course
+    app.get("/allCourse/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await courseCollection.findOne(query);
+      res.send(result);
+    });
+
     // ADD New Course
     app.post("/addnewcourse", async (req, res) => {
       const course = req.body.data;
@@ -63,15 +71,17 @@ async function run() {
     });
 
     // Delete Record Class
-    app.put("/recordedclasss/:id", async (req, res) => {
+    app.patch("/recordedclasss/:id", async (req, res) => {
       // {data.classdate, data.classlink, data.classsize, data.classduration}
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
-      const recordclass = req.body;
+      const classdate = req.body.classdate;
       const options = { upsert: true };
       const updateDoc = {
-        $push: {
-          recordClass: recordclass,
+        $pull: {
+          recordClass: {
+            classdate: classdate,
+          },
         },
       };
       const result = await courseCollection.updateOne(
